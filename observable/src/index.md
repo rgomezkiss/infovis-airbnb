@@ -22,8 +22,6 @@ toc: false
   </div>
 </div>
 
-# HOLA
-
 ---
 
 <style>

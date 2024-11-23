@@ -8,9 +8,10 @@ export default {
   // lets you organize them into sections and have unlisted pages.
   pages: [
     {
-      name: "Datos",
+      name: "Airbnb CABA",
       pages: [
         {name: "Datos", path: "/datos"},
+        {name: "Visualizaciones", path: "/visualizaciones"},
       ]
     }
   ],
