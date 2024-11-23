@@ -9,6 +9,8 @@ toc: false
 const data = await FileAttachment('./data/listings.csv').csv({typed: true});
 const neighborhoods = await FileAttachment('./data/neighborhoods.csv').csv({ typed: true })
 const geoNeighborhoods = await FileAttachment('./data/neighbourhoods_geo.json').json()
+const average_price_data = await FileAttachment('./data/average_price.csv')
+
 ```
 
 ## Filtros
@@ -65,4 +67,72 @@ const selectedNeighborhood = neighborhoodSelected == 'Todos' ? "Buenos Aires": n
 </div>
 
 ---
+
+## Precio promedio 
+```js
+geoData.features.forEach(feature => {
+  const name = feature.properties.neighbourhood; 
+  const row = data.find(d => d.neighbourhood === name);
+  feature.properties.average_price = row?.average_price || 0;
+  feature.properties.total_bookings = row?.total_bookings || 0;
+});
+
+viewof colorScalePrice = d3.scaleSequential()
+  .domain(d3.extent(data, d => d.average_price))
+  .interpolator(d3.interpolateBlues);
+
+mapAveragePrice = {
+  const svg = d3.create("svg").attr("viewBox", "0 0 800 800");
+
+  const projection = d3.geoMercator().fitSize([800, 800], geoData);
+  const path = d3.geoPath(projection);
+
+  svg.selectAll("path")
+    .data(geoData.features)
+    .join("path")
+    .attr("d", path)
+    .attr("fill", d => colorScalePrice(d.properties.average_price))
+    .attr("stroke", "white");
+
+  return svg.node();
+}
+```
+
+<div class="map-container">
+  ${mapAveragePrice}
+</div>
+
+---
+
+```js
+viewof radiusScaleBookings = d3.scaleSqrt()
+  .domain([0, d3.max(data, d => d.total_bookings)])
+  .range([0, 20]);
+
+mapTotalBookings = {
+  const svg = d3.create("svg").attr("viewBox", "0 0 800 800");
+
+  const projection = d3.geoMercator().fitSize([800, 800], geoData);
+  const path = d3.geoPath(projection);
+
+  svg.selectAll("path")
+    .data(geoData.features)
+    .join("path")
+    .attr("d", path)
+    .attr("fill", "#ddd")
+    .attr("stroke", "white");
+
+  svg.selectAll("circle")
+    .data(geoData.features.filter(d => d.properties.total_bookings > 0))
+    .join("circle")
+    .attr("cx", d => projection(d3.geoCentroid(d))[0])
+    .attr("cy", d => projection(d3.geoCentroid(d))[1])
+    .attr("r", d => radiusScaleBookings(d.properties.total_bookings))
+    .attr("fill", "red")
+    .attr("opacity", 0.7);
+
+  return svg.node();
+}
+```
+
 **Fuente de Datos:** [Inside Airbnb](https://insideairbnb.com/get-the-data/)
