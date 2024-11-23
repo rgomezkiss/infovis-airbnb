@@ -2,8 +2,8 @@ import pandas as pd
 import os
 from datetime import datetime
 
-VIS_INPUT_PATH = "./input/listings_vis.csv"  # Archivo de entrada para precios y bookings
-DETAILED_INPUT_PATH = "./input/listings_detailed.csv"  # Archivo de entrada para ratings, host_since y amenities
+LISTINGS_INPUT_PATH = "./data/listings.csv"  # Archivo de entrada para precios y bookings
+DETAILED_INPUT_PATH = "./data/listings_detailed.csv"  # Archivo de entrada para ratings, host_since y amenities
 OUTPUT_DIR = "./output"  # Carpeta para guardar los resultados
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -96,7 +96,7 @@ def analizar_host_location(df):
 
 def main():
     print("Cargando datos de listings_vis.csv...")
-    df_vis = pd.read_csv(VIS_INPUT_PATH)
+    df_vis = pd.read_csv(LISTINGS_INPUT_PATH)
     
     analizar_precios_y_bookings(df_vis)
     analizar_host_listings_count(df_vis)

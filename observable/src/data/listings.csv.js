@@ -1,0 +1,32 @@
+import { csvFormat, csvParse } from "d3-dsv";
+import { readFileSync } from "fs";
+
+async function text(url) {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
+  return response.text();
+}
+
+const csvData = readFileSync("../preprocessing/data/listings.csv", "utf8");
+
+const listings = csvParse(csvData, (d) => ({  
+  id: d.id,
+  name: d.name,
+  hostId: d.host_id,
+  hostName: d.host_name,
+  neighborhood: d.neighbourhood,
+  latitude: d.latitude,
+  longitude: d.longitude,
+  roomType: d.room_type,
+  price: +d.price,
+  minimumNights: +d.minimum_nights,
+  numberOfReviews: +d.number_of_reviews,
+  lastReview: d.last_review,
+  reviewsPerMonth: +d.reviews_per_month,
+  numberOfReviewsLTM: +d.number_of_reviews_ltm,
+  calculatedHostListingsCount: +d.calculated_host_listings_count,
+  availability365: +d.availability_365
+  
+}));
+
+process.stdout.write(csvFormat(listings));
