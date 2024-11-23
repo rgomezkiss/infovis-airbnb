@@ -1,49 +1,48 @@
-neighbourhood,average_price,total_bookings
-Agronomia,29137.8,534
-Almagro,67240.26,21489
-Balvanera,74954.68,21173
-Barracas,185670.15,5234
-Belgrano,63183.53,31077
-Boca,204822.15,1963
-Boedo,41666.73,1536
-Caballito,37180.56,8779
-Chacarita,33824.02,11186
-Coghlan,49266.72,1715
-Colegiales,70710.16,12995
-Constitucion,33463.38,11025
-Flores,32330.89,2181
-Floresta,39343.0,399
-Liniers,34596.09,155
-Mataderos,32125.22,234
-Monserrat,77077.67,37967
-Monte Castro,29660.42,140
-Nueva Pompeya,20026.86,68
-Nuñez,42190.7,13459
-Palermo,65733.21,372611
-Parque Avellaneda,53629.32,140
-Parque Chacabuco,32862.59,973
-Parque Chas,37480.42,837
-Parque Patricios,30830.86,871
-Paternal,29111.79,236
-Puerto Madero,101112.14,12309
-Recoleta,52143.33,136920
-Retiro,62475.23,45679
-Saavedra,39457.37,3563
-San Cristobal,57940.56,2647
-San Nicolas,72482.02,71239
-San Telmo,187292.61,29022
-Velez Sarsfield,33091.83,186
-Versalles,44173.86,46
-Villa Crespo,127048.18,26978
-Villa Del Parque,36558.01,1400
-Villa Devoto,37928.4,1334
-Villa Gral. Mitre,30264.73,302
-Villa Lugano,27550.71,42
-Villa Luro,1231679.06,420
-Villa Ortuzar,90632.15,1733
-Villa Pueyrredon,28783.71,719
-Villa Real,21094.0,39
-Villa Riachuelo,17964.5,0
-Villa Santa Rita,35933.59,618
-Villa Soldati,,0
-Villa Urquiza,33668.22,5324
+neighbourhood,mean,count
+Puerto Madero,59422,155
+Palermo,37073,9850
+Colegiales,36874,693
+Recoleta,36383,4489
+Belgrano,35671,1659
+Retiro,34881,1410
+Versalles,34675,6
+Nuñez,34191,624
+Velez Sarsfield,33092,18
+Villa Devoto,32877,97
+Floresta,32458,41
+San Telmo,32179,864
+Barracas,31877,257
+San Nicolas,31849,2079
+Villa Urquiza,31166,381
+Parque Chacabuco,31141,68
+Parque Chas,30679,64
+Villa Crespo,30100,1106
+Monte Castro,29660,12
+Almagro,29659,1222
+Chacarita,29624,560
+Mataderos,29603,36
+Monserrat,29594,1558
+Villa Del Parque,29582,112
+Boca,29496,108
+Caballito,29458,667
+Saavedra,29054,230
+Parque Patricios,28780,84
+Villa Gral. Mitre,28479,36
+Villa Luro,28196,29
+Villa Ortuzar,27780,112
+Liniers,27616,22
+Villa Lugano,27551,7
+Agronomia,27336,39
+Balvanera,27310,1131
+Paternal,27257,47
+Villa Santa Rita,27211,31
+Constitucion,27126,438
+Flores,26688,151
+Villa Pueyrredon,26655,64
+Coghlan,26472,103
+Parque Avellaneda,25949,16
+Boedo,25344,115
+San Cristobal,25173,206
+Villa Real,21094,2
+Nueva Pompeya,20027,14
+Villa Riachuelo,17964,2

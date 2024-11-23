@@ -7,12 +7,12 @@ async function text(url) {
   return response.text();
 }
 
-const csvData = readFileSync("../preprocessing/data/average_price_and_bookings_by_neighbourhood.csv", "utf8");
+const csvData = readFileSync("../preprocessing/output/average_price_and_bookings_by_neighbourhood.csv", "utf8");
 
 const average_price = csvParse(csvData, (d) => ({  
     neighbourhood: d.neighbourhood,
-    average_price: +d.average_price,
-    total_bookings: +d.total_bookings
+    average_price: +d.mean,
+    total_bookings: +d.count
 }));
 
 process.stdout.write(csvFormat(average_price));
