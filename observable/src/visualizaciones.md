@@ -6,22 +6,45 @@ toc: false
 # Visualizaciones
 
 ```js
-//const data = await FileAttachment('./data/listings.csv').csv({typed: true});
+const listings = await FileAttachment('./data/listings.csv').csv({typed: true});
+const listings_filtrado = await FileAttachment('./data/listings_filtrado.csv').csv({typed: true});
 const neighborhoods = await FileAttachment('./data/neighborhoods.csv').csv({ typed: true })
 const geoNeighborhoods = await FileAttachment('./data/neighbourhoods_geo.json').json()
-const data = await FileAttachment('./data/average_price.csv').csv({ typed: true })
 ```
 
-## Filtros
+```js
+const neighborhoodStats = Object.values(
+  listings_filtrado.reduce((acc, curr) => {
+    const { neighborhood, price } = curr;
+
+    if (!acc[neighborhood]) {
+      acc[neighborhood] = { neighborhood, totalPrice: 0, totalCount: 0 };
+    }
+
+    acc[neighborhood].totalPrice += price;
+    acc[neighborhood].totalCount += 1;
+
+    return acc;
+  }, {})
+)
+  .map(({ neighborhood, totalPrice, totalCount }) => ({
+    neighbourhood: neighborhood,
+    average_price: Math.round(totalPrice / totalCount),
+    total_listings: totalCount,
+  }))
+  .sort((a, b) => b.average_price - a.average_price);
+```
+
+---
 
 ```js
-let [minPriceSlider, maxPriceSlider] = d3.extent(data, (d) => d.average_price);
+let [minPriceSlider, maxPriceSlider] = d3.extent(neighborhoodStats, (d) => d.average_price);
 minPriceSlider = Math.ceil(minPriceSlider); 
 maxPriceSlider = Math.ceil(maxPriceSlider);  
 
-let [minBookingsSlider, maxBookingsSlider] = d3.extent(data, (d) => d.total_bookings);
-minBookingsSlider = Math.ceil(minBookingsSlider);  
-maxBookingsSlider = Math.ceil(maxBookingsSlider); 
+let [minListingsSlider, maxListingsSlider] = d3.extent(neighborhoodStats, (d) => d.total_listings);
+minListingsSlider = Math.ceil(minListingsSlider);  
+maxListingsSlider = Math.ceil(maxListingsSlider); 
 
 // Aplicar los rangos a los sliders
 let minPrice = view(Inputs.range([minPriceSlider, maxPriceSlider], {
@@ -38,32 +61,32 @@ let maxPrice = view(Inputs.range([minPriceSlider, maxPriceSlider], {
   value: maxPriceSlider
 }));
 
-let minBookings = view(Inputs.range([minBookingsSlider, maxBookingsSlider], {
+let minListings = view(Inputs.range([minListingsSlider, maxListingsSlider], {
   step: 1,
   format: x => x.toFixed(0),
-  label: "Bookings mínimo",
-  value: minBookingsSlider
+  label: "Listings mínimo",
+  value: minListingsSlider
 }));
 
-let maxBookings = view(Inputs.range([minBookingsSlider, maxBookingsSlider], {
+let maxListings = view(Inputs.range([minListingsSlider, maxListingsSlider], {
   step: 1,
   format: x => x.toFixed(0),
-  label: "Bookings máximo",
-  value: maxBookingsSlider
+  label: "Listings máximo",
+  value: maxListingsSlider
 }));
 ```
 
 ```js
-let filteredData = data.filter((d) => 
+let filteredData = neighborhoodStats.filter((d) => 
   d.average_price >= minPrice && 
   d.average_price <= maxPrice &&
-  d.total_bookings >= minBookings && 
-  d.total_bookings <= maxBookings
+  d.total_listings >= minListings && 
+  d.total_listings <= maxListings
 );
 ```
 
 ```js
-let anuncios = filteredData.reduce((acc, d) => acc + d.total_bookings, 0).toLocaleString("en-US");
+let anuncios = filteredData.reduce((acc, d) => acc + d.total_listings, 0).toLocaleString("en-US");
 
 let barrios = d3.group(filteredData, (d) => d.neighbourhood).size || 0; // Evitar errores si no hay barrios
 
@@ -118,7 +141,7 @@ function plotMap(neighbourhoods, data) {
 
     const dataMap = new Map(data.map(d => [d.neighbourhood, {
         average_price: d.average_price,
-        total_bookings: d.total_bookings
+        total_listings: d.total_listings
     }]));
 
     return Plot.plot({
@@ -138,8 +161,8 @@ function plotMap(neighbourhoods, data) {
                 fill: d => dataMap.get(d.properties.neighbourhood)?.average_price || 0,
                 title: d => {
                     const average_price = dataMap.get(d.properties.neighbourhood)?.average_price || 0;
-                    const total_bookings = dataMap.get(d.properties.neighbourhood)?.total_bookings || 0;
-                    return `Barrio: ${d.properties.neighbourhood}\nPrecio promedio: ${average_price}\nNúmero de propiedades: ${total_bookings}`;
+                    const total_listings = dataMap.get(d.properties.neighbourhood)?.total_listings || 0;
+                    return `Barrio: ${d.properties.neighbourhood}\nPrecio promedio: ${average_price}\nNúmero de propiedades: ${total_listings}`;
                 },
                 tip: true
             }),
@@ -160,7 +183,7 @@ function plotMap(neighbourhoods, data) {
 
 ```js
 function scatterPlotCountMean(data, {width} = {}) {
-    const sortedData = [...data].sort((a, b) => a.total_bookings - b.total_bookings);
+    const sortedData = [...data].sort((a, b) => a.total_listings - b.total_listings);
 
     const height = 400;
 
@@ -178,9 +201,9 @@ function scatterPlotCountMean(data, {width} = {}) {
         },
         marks: [
             Plot.dot(sortedData, {
-                x: "total_bookings",
+                x: "total_listings",
                 y: "average_price",
-                title: d => `Barrio: ${d.neighbourhood}\nNúmero de propiedades: ${d.total_bookings}\nPromedio: ${d.average_price}`,
+                title: d => `Barrio: ${d.neighbourhood}\nNúmero de propiedades: ${d.total_listings}\nPromedio: ${d.average_price}`,
                 stroke: "black", // Contorno negro para destacar los puntos
                 fill: "steelblue", // Color de los puntos
                 tip: true // Habilita el tip para cada punto
@@ -208,9 +231,9 @@ function histogramCount(data, {width} = {}) {
         },
         marks: [
             Plot.rectY(data, Plot.binX({y: "count", thresholds: 8}, {
-                x: "total_bookings",
+                x: "total_listings",
                 fill: "steelblue",
-                title: d => `Número de propiedades: ${d.bin0} - ${d.bin1}\nCantidad de barrios: ${d.total_bookings}`,
+                title: d => `Número de propiedades: ${d.bin0} - ${d.bin1}\nCantidad de barrios: ${d.total_listings}`,
             }))
         ],
     });
@@ -256,7 +279,7 @@ function pricePerNeighbourhood(data, {width} = {}) {
             Plot.barX(sortedData, {
                 y: "neighbourhood",
                 x: "average_price",
-                fill: "total_bookings",
+                fill: "total_listings",
                 title: d => `Precio: ${d.average_price}`,
                 tip: true
             }),
@@ -290,7 +313,7 @@ geoData.features.forEach(feature => {
   const name = feature.properties.neighbourhood; 
   const row = data.find(d => d.neighbourhood === name);
   feature.properties.average_price = row?.average_price || 0;
-  feature.properties.total_bookings = row?.total_bookings || 0;
+  feature.properties.total_listings = row?.total_listings || 0;
 });
 
 viewof colorScalePrice = d3.scaleSequential()
@@ -321,11 +344,11 @@ mapAveragePrice = {
 ---
 
 ```js
-viewof radiusScaleBookings = d3.scaleSqrt()
-  .domain([0, d3.max(data, d => d.total_bookings)])
+viewof radiusScaleListings = d3.scaleSqrt()
+  .domain([0, d3.max(data, d => d.total_listings)])
   .range([0, 20]);
 
-mapTotalBookings = {
+mapTotalListings = {
   const svg = d3.create("svg").attr("viewBox", "0 0 800 800");
 
   const projection = d3.geoMercator().fitSize([800, 800], geoData);
@@ -339,11 +362,11 @@ mapTotalBookings = {
     .attr("stroke", "white");
 
   svg.selectAll("circle")
-    .data(geoData.features.filter(d => d.properties.total_bookings > 0))
+    .data(geoData.features.filter(d => d.properties.total_listings > 0))
     .join("circle")
     .attr("cx", d => projection(d3.geoCentroid(d))[0])
     .attr("cy", d => projection(d3.geoCentroid(d))[1])
-    .attr("r", d => radiusScaleBookings(d.properties.total_bookings))
+    .attr("r", d => radiusScaleListings(d.properties.total_listings))
     .attr("fill", "red")
     .attr("opacity", 0.7);
 

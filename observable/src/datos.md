@@ -5,15 +5,20 @@ toc: false
 
 ```js
 const data = await FileAttachment('./data/listings.csv').csv({typed: true});
+const listings_filtrado = await FileAttachment('./data/listings_filtrado.csv').csv({typed: true});
 const neighborhoods = await FileAttachment('./data/neighborhoods.csv').csv({ typed: true })
+
+const WIDHT = 800
+const boxplot = await FileAttachment('./data/boxplot.png').image({width: WIDHT});
+const boxplot_removed = await FileAttachment('./data/boxplot_removed.png').image({width: WIDHT});
 ```
 
-# Datos
+## Datos
 
 Se utilizaron principalmente dos datasets:
 
 - neighborhoods.csv (${neighborhoods.length} datos)
-- listings.csv (${data.length} datos)
+- listings.csv y listings_detailed.csv (${data.length} datos)
   
 `neighborhoods.csv` solo contiene los nombres de los distintos barrios de CABA. Mientras que `listings.csv` cuenta con los siguientes datos:
 
@@ -36,7 +41,15 @@ Se utilizaron principalmente dos datasets:
 - **number_of_reviews_ltm**: Número de reseñas en los últimos 12 meses.
 - **license**: Número de licencia de la propiedad (si aplica).
 
-Verificamos que no existan filas duplicadas en `listings.csv` y removimos los outliers de precios que empeoraban la visualización.
+Verificamos que no existan filas duplicadas en `listings.csv` y removimos los outliers de precios que empeoraban la visualización (quedandonos con ${listings_filtrado.length} datos).
+
+```js
+boxplot
+```
+
+```js
+boxplot_removed
+```
 
 ---
 **Fuente de Datos:** [Inside Airbnb](https://insideairbnb.com/get-the-data/)
