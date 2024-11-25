@@ -27,7 +27,12 @@ const listings_detailed = csvParse(csvData, (d) => ({
     availability365: +d.availability_365 || 0,
     numberOfReviewsLTM: +d.number_of_reviews_ltm || 0,
     license: d.license || '',   */
+
     // Nuevos valores detallados
+    //accommodates: +d.accommodates || 0, // Commented cause ALL 0
+    bathrooms: +d.bathrooms || 0,
+    //bedrooms: +d.bedrooms || 0,   // Commented cause ALL 0
+    beds: +d.beds || 0,
     amenities: d.amenities || '',  
     hostResponseRate: d.host_response_rate || '',  
     hostResponseTime: d.host_response_time || '',  
@@ -39,7 +44,7 @@ const listings_detailed = csvParse(csvData, (d) => ({
     communicationRating: +d.review_scores_communication || 0,
     locationRating: +d.review_scores_location || 0,
     valueRating: +d.review_scores_value || 0,
-    hostSince: d.host_since ? new Date(d.host_since) : null  
+    hostSince: d.host_since ? new Date(d.host_since) : null
 }));
   
 process.stdout.write(csvFormat(listings_detailed));

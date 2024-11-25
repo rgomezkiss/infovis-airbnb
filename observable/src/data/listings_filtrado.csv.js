@@ -14,7 +14,7 @@ const listings = csvParse(csvData, (d) => ({
   name: d.name,
   hostId: d.host_id,
   hostName: d.host_name,
-  neighborhoodGroup: d.neighbourhood_group,
+  //neighborhoodGroup: d.neighbourhood_group,
   neighborhood: d.neighbourhood,
   latitude: d.latitude,
   longitude: d.longitude,
@@ -27,7 +27,7 @@ const listings = csvParse(csvData, (d) => ({
   calculatedHostListingsCount: +d.calculated_host_listings_count,
   availability365: +d.availability_365,
   numberOfReviewsLTM: +d.number_of_reviews_ltm,
-  license: d.license,
+  //license: d.license,
 }));
 
 process.stdout.write(csvFormat(listings));

@@ -56,7 +56,7 @@ Por otro lado, `listings_detailed.csv` cuenta con los siguientes valores adicion
 - **valueRating**: Valoración de la relación calidad-precio.
 - **hostSince**: Fecha en que el anfitrión empezó a listar propiedades.
 
-Verificamos que no existan filas duplicadas en `listings.csv` y removimos los outliers de precios que empeoraban la visualización, basandonos en el Rango Intercuartílico (IQR), (quedandonos con ${listings_filtrado.length} datos).
+Verificamos que no existan filas duplicadas en `listings.csv` y removimos los outliers de precios que empeoraban la visualización, basandonos en el Rango Intercuartílico (IQR), quedandonos asi con ${listings_filtrado.length} datos.
 
 ```js
 boxplot

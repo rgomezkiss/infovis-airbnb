@@ -18,10 +18,12 @@ const listings = listings_filtrado.map(listing => {
     ...(detailedData || {}) // Datos adicionales de listings_detailed (si existe)
   };
 });
+
+const ROOM_TYPES = Array.from(new Set(listings.map(d => d.roomType)))
+const NEIGHBORHOODS = Array.from(new Set(neighborhoods.map(d => d.neighborhood)))
 ```
 
 # Visualizaciones de barrios y precios
-
 
 ```js
 const neighborhoodStats = Object.values(
@@ -75,14 +77,14 @@ let maxPrice = view(Inputs.range([minPriceSlider, maxPriceSlider], {
 let minListings = view(Inputs.range([minListingsSlider, maxListingsSlider], {
   step: 1,
   format: x => x.toFixed(0),
-  label: "Listings mínimo",
+  label: "Propiedades mínimo",
   value: minListingsSlider
 }));
 
 let maxListings = view(Inputs.range([minListingsSlider, maxListingsSlider], {
   step: 1,
   format: x => x.toFixed(0),
-  label: "Listings máximo",
+  label: "Propiedades máximo",
   value: maxListingsSlider
 }));
 ```
@@ -97,7 +99,7 @@ let filteredData = neighborhoodStats.filter((d) =>
 ```
 
 ```js
-let anuncios = filteredData.reduce((acc, d) => acc + d.total_listings, 0).toLocaleString("en-US");
+let propiedades = filteredData.reduce((acc, d) => acc + d.total_listings, 0).toLocaleString("en-US");
 
 let barrios = d3.group(filteredData, (d) => d.neighbourhood).size || 0; 
 
@@ -116,8 +118,8 @@ let precio_barrio_mas_barato = minPrecio ? minPrecio.toLocaleString("en-US", {st
 
 <div class="grid grid-cols-3">
   <div class="card">
-    <h2>Anuncios 🏠</h2>
-    <span class="big">${anuncios}</span>
+    <h2>Propiedades 🏠</h2>
+    <span class="big">${propiedades}</span>
   </div>
   <div class="card">
     <h2>Barrios 📌</h2>
@@ -155,7 +157,7 @@ function plotMapListingsByLocation(neighbourhoods, data) {
     }]));
 
     return Plot.plot({
-        title: "Mapa de listings por barrio",
+        title: "Mapa de propiedades por barrio",
         projection,
         width,
         height,
@@ -179,7 +181,7 @@ function plotMapListingsByLocation(neighbourhoods, data) {
 }
 ```
 
-## Listings por ubicación
+## Propiedades por ubicación
 
 <div class="grid grid-cols-1">
     <div class="card">
@@ -267,7 +269,6 @@ function scatterPlotCountMean(data, {width} = {}) {
     });
 }
 ```
-## Relacion entre la cantidad de propiedades y el precio en los barrios
 
 <div class="grid grid-cols-2">
     <div class="card">
@@ -300,7 +301,7 @@ function pricePerNeighbourhood(data, {width} = {}) {
           legend: true, 
           type: "linear", 
           scheme: "blues",
-          label: "Cantidad de listings"
+          label: "Cantidad de propiedades"
         },
         marks: [
             Plot.barX(sortedData, {
@@ -334,7 +335,7 @@ function pricePerNeighbourhood(data, {width} = {}) {
 ---
 ---
 
-# Visualizaciones de barrios y ratings
+# Visualizaciones de barrios, ratings y commodities
 
 ```js
 const RATINGS = [
@@ -345,18 +346,21 @@ const RATINGS = [
   { label: "Valor", value: "avgValue" }
 ]
 
-let selectedRating = view(Inputs.select([
-  "avgCleanliness",
-  "avgCheckin",
-  "avgCommunication",
-  "avgLocation",
-  "avgValue"
-], {
+let selectedRatingView = view(Inputs.select(
+  RATINGS.map(d => d.label)
+, {
   label: "Selecciona el rating",
   value: "avgValue" // Valor por defecto
 }))
+```
 
+```js
+let selectedRating = RATINGS.find(
+  c => c.label === selectedRatingView
+).value;
+```
 
+```js
 const ratingStats = Object.values(
   listings.reduce((acc, curr) => {
     const {
@@ -418,7 +422,7 @@ function plotMapRatingsByLocation(neighbourhoods, data, selectedRating) {
   ]));
 
   return Plot.plot({
-    title: `Mapa de ${selectedRating} por barrio`,
+    title: `Mapa de rating '${RATINGS.find(c => c.value === selectedRating).label}' por barrio`,
     projection,
     width,
     height,
@@ -448,13 +452,324 @@ function plotMapRatingsByLocation(neighbourhoods, data, selectedRating) {
 
 ```
 
-## Ratings por ubicación
-
 <div class="grid grid-cols-1">
     <div class="card">
         ${plotMapRatingsByLocation(geoNeighborhoods, ratingStats, selectedRating)}
     </div>
 </div>
 
+## Commodities por ubicación
+
+```js
+const COMMODITIES = [
+  { label: "Baños", value: "avgBathrooms" },
+  { label: "Camas", value: "avgBeds" },
+];
+
+let selectedCommoditieView = view(Inputs.select(
+  COMMODITIES.map(c => c.label),
+  {
+    label: "Selecciona la métrica",
+    value: "Baños" // Valor por defecto
+  }
+));
+```
+
+```js
+let selectedCommoditie = COMMODITIES.find(
+  c => c.label === selectedCommoditieView
+).value;
+```
+
+```js
+const commoditiesStats = Object.values(
+  listings.reduce((acc, curr) => {
+    const {
+      neighborhood,
+      bathrooms,
+      beds,
+    } = curr;
+
+    if (!acc[neighborhood]) {
+      acc[neighborhood] = {
+        neighborhood,
+        totalBathrooms: 0,
+        totalBeds: 0,
+        totalCount: 0
+      };
+    }
+
+    acc[neighborhood].totalBathrooms += bathrooms || 0;
+    acc[neighborhood].totalBeds += beds || 0;
+    acc[neighborhood].totalCount += 1;
+
+    return acc;
+  }, {})
+)
+  .map(({ neighborhood, totalBathrooms, totalBedrooms, totalBeds, totalAccommodates, totalCount }) => ({
+    neighborhood,
+    total_listings: totalCount,
+    avgBathrooms: (totalBathrooms / totalCount).toFixed(2),
+    avgBeds: (totalBeds / totalCount).toFixed(2),
+  }))
+  .sort((a, b) => b.total_listings - a.total_listings);
+```
+
+```js
+function plotMapCommoditiesByLocation(neighbourhoods, data, selectedCommoditie) {
+  const height = 610;
+
+  const projection = d3.geoMercator();
+  projection.fitExtent([[0, 0], [width, height]], neighbourhoods);
+
+  const dataMap = new Map(data.map(d => [
+    d.neighborhood,
+    {
+      commoditie: d[selectedCommoditie],
+      total_listings: d.total_listings
+    }
+  ]));
+
+  return Plot.plot({
+    title: `Mapa de ${COMMODITIES.find(c => c.value === selectedCommoditie).label} promedio por barrio`,
+    projection,
+    width,
+    height,
+    color: {
+      legend: true,
+      scheme: "blues",
+      domain: [
+        Math.min(...data.map(d => parseFloat(d[selectedCommoditie]))),
+        Math.max(...data.map(d => parseFloat(d[selectedCommoditie]))),
+      ]
+    },
+    marks: [
+      Plot.geo(neighbourhoods, {
+        stroke: "black",
+        strokeWidth: 1,
+        fill: d => dataMap.get(d.properties.neighbourhood)?.commoditie || 0,
+        title: d => {
+          const commoditie = dataMap.get(d.properties.neighbourhood)?.commoditie || 0;
+          const total_listings = dataMap.get(d.properties.neighbourhood)?.total_listings || 0;
+          return `Barrio: ${d.properties.neighbourhood}\n${selectedCommoditie}: ${commoditie}\nNúmero de propiedades: ${total_listings}`;
+        },
+        tip: true
+      }),
+    ]
+  });
+}
+```
+
+<div class="grid grid-cols-1">
+    <div class="card">
+        ${plotMapCommoditiesByLocation(geoNeighborhoods, commoditiesStats, selectedCommoditie)}
+    </div>
+</div>
+
+---
+
+```js
+const roomTypeCounts = listings.reduce((acc, curr) => {
+  const { roomType } = curr;
+  acc[roomType] = (acc[roomType] || 0) + 1;
+  return acc;
+}, {});
+
+const sortedRoomTypes = Object.entries(roomTypeCounts)
+  .sort((a, b) => b[1] - a[1])  
+  .map(([roomType, count]) => ({ roomType, count }));
+
+const roomTypes = sortedRoomTypes.map(item => item.roomType);
+const counts = sortedRoomTypes.map(item => item.count);
+
+const totalRooms = counts.reduce((acc, curr) => acc + curr, 0);
+
+const percentages = counts.map(count => ((count / totalRooms) * 100).toFixed(2));
+
+const roomStatsHTML = roomTypes.map((roomType, index) => {
+    return `${roomType}: ${counts[index]} (${percentages[index]}%)`;
+  }).join(' --- ');
+```
+
+```js
+function plotRoomType(sortedRoomTypes) {
+  return Plot.plot({
+    marks: [
+      Plot.barX(sortedRoomTypes, { 
+        x: counts, 
+        y: roomTypes, 
+        fill: "steelblue", 
+        stroke: "white" ,
+        sort: { y: "x", reverse: true }, 
+      })
+    ],
+    marginLeft: 100,
+    width: 600,
+    height: 400,
+    x: { 
+      label: "Cantidad",
+      grid: true
+    },
+    title: "Distribución de los tipos de habitación"
+  });
+}
+
+```
+
+<div class="grid grid-cols-1">
+    <div class="card">
+        ${plotRoomType(sortedRoomTypes)}
+    </div>
+</div>
+
+<div class="card">
+  <span class="big">${roomStatsHTML}</span>
+</div>
+
+
+---
+
+# Visualizaciones de propiedades y propietarios
+
+
+```js
+function plotHostSinceHistogram(data) {
+  const yearCount = data.reduce((acc, curr) => {
+    const year = new Date(curr.hostSince).getFullYear();
+    if (!acc[year]) {
+      acc[year] = 0;
+    } 
+    acc[year] += 1;
+    return acc;
+  }, {});
+
+  const years = Object.keys(yearCount);
+  const counts = Object.values(yearCount);
+
+  return Plot.plot({
+    marks: [
+      Plot.barY(counts, {
+        x: years,  // Usamos los años en el eje X
+        fill: "steelblue",
+        title: "Host Since"
+      })
+    ],
+    x: {
+      label: "Año",
+      type: "band"
+    },
+    y: { 
+      label: "Número de propiedades",
+      grid: true,
+      tickFormat: d3.format("d")
+    },
+    title: "Distribución de los años de inicio de las propiedades"
+  });
+}
+```
+
+<div class="grid grid-cols-1">
+    <div class="card">
+        ${plotHostSinceHistogram(listings)}
+    </div>
+</div>
+
+---
+
+## Top propietarios
+
+```js
+let neighborhoodSelected = view(Inputs.select(
+  ["Todos", ...NEIGHBORHOODS],
+  { 
+    label: "Barrio",
+    value: "Todos" 
+  }
+));
+
+let topHostsCount = await view(Inputs.range(
+  [10, 1000], 
+  {
+    step: 5,
+    label: "Top hosts",
+    value: 10
+  }
+));
+
+let minProperties = view(Inputs.range(
+  [1, 100], 
+  {
+    step: 1,
+    label: "Propiedades mínimas",
+    value: 10
+  }
+));
+
+let maxProperties = view(Inputs.range(
+  [1, 250], 
+  {
+    step: 1,
+    label: "Propiedades máximas",
+    value: 100
+  }
+));
+
+let listingsByHost = d3.group(listings, d => d.hostId)
+let hostRatings = d3.rollup(listings, v => d3.mean(v, d => d.rating), d=> d.hostId)
+```
+
+```js
+let topHosts = Array.from(hostRatings.entries())
+  .map(([hostId, avgRating]) => {
+    let listings = listingsByHost.get(hostId);
+    if(neighborhoodSelected != 'Todos'){
+      listings = listings.filter(listing => listing.neighborhood == neighborhoodSelected);
+    }
+    if(listings.length == 0 || listings.length < minProperties || listings.length > maxProperties) return null;
+
+    const hostName = listings[0].hostName;
+    const propertyCount = listings.length;
+
+    return { 
+      hostId,
+      avgRating,
+      hostName,
+      propertyCount
+    };
+  })
+  .filter(d => d !== null)
+  .sort((a, b) => b.avgRating - a.avgRating)
+  .slice(0,topHostsCount);
+```
+
+```js
+Plot.plot({
+  marginTop: 20,
+  marginRight: 20,
+  marginBottom: 50,
+  marginLeft: 100,
+  height: 40 * topHosts.length, 
+  color: {
+    scheme: "category10",
+  },
+  marks: [
+    Plot.barX(topHosts, {
+      x: "propertyCount",
+      y: "hostName",
+      fill: "hostName",
+      sort: { y: "x", reverse: true }, 
+    }),
+    Plot.ruleX([0]), 
+  ],
+  x: {
+    label: "Cantidad de propiedades",
+    grid: true, 
+  },
+  y: {
+    label: "Nombre del propietario",
+    tickSize: 0,
+  },
+})
+```
 
 **Fuente de Datos:** [Inside Airbnb](https://insideairbnb.com/get-the-data/)
