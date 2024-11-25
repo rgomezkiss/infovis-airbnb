@@ -254,20 +254,20 @@ function scatterPlotCountMean(data, {width} = {}) {
 function pricePerNeighbourhood(data, {width} = {}) {
     const sortedData = [...data].sort((a, b) => b.average_price - a.average_price);
     
-    const height = sortedData.length * 20;
+    const height = sortedData.length * 40;
 
     return Plot.plot({
         title: "Precio promedio por barrio",
         width,
         height,
         y: {
-            label: "",
             grid: true,
             domain: sortedData.map(d => d.neighbourhood),
             axis: null
         },
         x: {
-            label: "Precio promedio"
+            label: "Precio promedio",
+            grid: true,
         },
         color: { 
           legend: true, 
@@ -281,7 +281,7 @@ function pricePerNeighbourhood(data, {width} = {}) {
                 x: "average_price",
                 fill: "total_listings",
                 title: d => `Precio promedio: $${d.average_price}\nNúmero de propiedades: ${d.total_listings}`,
-                tip: true
+                tip: true,
             }),
             Plot.text(sortedData, {
                 y: "neighbourhood",
@@ -290,7 +290,8 @@ function pricePerNeighbourhood(data, {width} = {}) {
                 fill: "black",
                 dx: -10,
                 dy: 0,
-                textAnchor: "end"
+                textAnchor: "end",
+                fontSize: 14
             }),
             Plot.ruleY([0])
         ],
