@@ -11,7 +11,7 @@ const csvData = readFileSync("../preprocessing/data/listings_detailed.csv", "utf
 
 const listings_detailed = csvParse(csvData, (d) => ({  
     id: d.id,
-    name: d.name,
+    /* name: d.name,
     hostId: d.host_id,
     hostName: d.host_name,
     neighborhood: d.neighbourhood_group_cleansed,
@@ -26,7 +26,7 @@ const listings_detailed = csvParse(csvData, (d) => ({
     calculatedHostListingsCount: +d.calculated_host_listings_count || 0,
     availability365: +d.availability_365 || 0,
     numberOfReviewsLTM: +d.number_of_reviews_ltm || 0,
-    license: d.license || '',  
+    license: d.license || '',   */
     // Nuevos valores detallados
     amenities: d.amenities || '',  
     hostResponseRate: d.host_response_rate || '',  

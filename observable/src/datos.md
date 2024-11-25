@@ -41,7 +41,22 @@ Se utilizaron principalmente dos datasets:
 - **number_of_reviews_ltm**: Número de reseñas en los últimos 12 meses.
 - **license**: Número de licencia de la propiedad (si aplica).
 
-Verificamos que no existan filas duplicadas en `listings.csv` y removimos los outliers de precios que empeoraban la visualización (quedandonos con ${listings_filtrado.length} datos).
+Por otro lado, `listings_detailed.csv` cuenta con los siguientes valores adicionales:
+
+- **amenities**: Comodidades de la propiedad (ej. Wi-Fi, aire acondicionado).
+- **hostResponseRate**: Tasa de respuesta del anfitrión.
+- **hostResponseTime**: Tiempo de respuesta del anfitrión.
+- **hostIsSuperhost**: Indica si el anfitrión es Superhost.
+- **rating**: Valoración general de la propiedad.
+- **accuracyRating**: Valoración de la precisión de la descripción de la propiedad.
+- **cleanlinessRating**: Valoración de la limpieza de la propiedad.
+- **checkinRating**: Valoración del proceso de check-in.
+- **communicationRating**: Valoración de la comunicación con el anfitrión.
+- **locationRating**: Valoración de la ubicación de la propiedad.
+- **valueRating**: Valoración de la relación calidad-precio.
+- **hostSince**: Fecha en que el anfitrión empezó a listar propiedades.
+
+Verificamos que no existan filas duplicadas en `listings.csv` y removimos los outliers de precios que empeoraban la visualización, basandonos en el Rango Intercuartílico (IQR), (quedandonos con ${listings_filtrado.length} datos).
 
 ```js
 boxplot

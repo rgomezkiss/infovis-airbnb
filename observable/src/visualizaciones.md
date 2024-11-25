@@ -25,7 +25,7 @@ const listings = listings_filtrado.map(listing => {
 
 ```js
 const neighborhoodStats = Object.values(
-  listings_filtrado.reduce((acc, curr) => {
+  listings.reduce((acc, curr) => {
     const { neighborhood, price } = curr;
 
     if (!acc[neighborhood]) {
@@ -358,7 +358,7 @@ let selectedRating = view(Inputs.select([
 
 
 const ratingStats = Object.values(
-  listings_detailed.reduce((acc, curr) => {
+  listings.reduce((acc, curr) => {
     const {
       neighborhood,
       cleanlinessRating,
