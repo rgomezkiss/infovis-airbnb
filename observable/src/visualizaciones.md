@@ -100,7 +100,12 @@ let barrio_mas_barato = filteredData.find((d) => d.average_price === minPrecio)?
 let precio_barrio_mas_barato = minPrecio ? minPrecio.toLocaleString("en-US", {style: "currency", currency: "USD"}) : "N/A";
 ```
 
-<div class="grid grid-cols-3">
+
+<div class="grid grid-cols-4">
+  <div class="card">
+    <h2>Propiedades</h2>
+    <span class="big">${propiedades}</span>
+  </div>
   <div class="card">
     <h2>Precio Promedio</h2>
     <span class="big">${precio_promedio}</span>
