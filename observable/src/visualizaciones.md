@@ -102,20 +102,9 @@ let precio_barrio_mas_barato = minPrecio ? minPrecio.toLocaleString("en-US", {st
 
 <div class="grid grid-cols-3">
   <div class="card">
-    <h2>Propiedades 🏠</h2>
-    <span class="big">${propiedades}</span>
-  </div>
-  <div class="card">
-    <h2>Barrios 📌</h2>
-    <span class="big">${barrios}</span>
-  </div>
-  <div class="card">
-    <h2>Precio Promedio 💰</h2>
+    <h2>Precio Promedio</h2>
     <span class="big">${precio_promedio}</span>
   </div>
-</div>
-
-<div class="grid grid-cols-2">
   <div class="card">
     <h2>Barrio más caro <span class="muted">/ ${barrio_mas_caro}</span></h2>
     <span class="big">${precio_barrio_mas_caro}</span>
@@ -127,7 +116,6 @@ let precio_barrio_mas_barato = minPrecio ? minPrecio.toLocaleString("en-US", {st
 </div>
 
 ---
-
 
 ```js
 function plotMapListingsByLocation(neighbourhoods, data) {
@@ -608,6 +596,92 @@ function plotRoomType(sortedRoomTypes) {
 
 # Visualizaciones de propiedades y propietarios
 
+```js
+let neighborhoodsSelectedForMap = view(Inputs.select(
+  ["Todos", ...NEIGHBORHOODS],
+  { 
+    label: "Barrios",
+    multiple: true, 
+    value: ["Todos"] 
+  }
+));
+```
+
+```js
+let listingsFiltradoForMap = listings;
+if (!neighborhoodsSelectedForMap.includes("Todos")) {
+  listingsFiltradoForMap = listings.filter(d => neighborhoodsSelectedForMap.includes(d.neighborhood));
+}
+```
+
+```js
+import deck from "npm:deck.gl";
+
+const {DeckGL, GeoJsonLayer, ScatterplotLayer} = deck;
+
+const mainContainer = document.createElement('div');
+mainContainer.style.position = 'relative';
+
+const container = document.createElement('div');
+container.style.height = '600px';
+container.style.width = '100%';
+container.style.position = 'relative';
+container.style.borderRadius = '8px';
+container.style.overflow = 'hidden';
+
+const initialViewState = {
+  longitude: -58.3816,
+  latitude: -34.6037,
+  zoom: 10,
+  pitch: 0,
+  bearing: 0
+};
+
+const deckInstance = new DeckGL({
+  container,
+  initialViewState,
+  controller: true
+});
+
+invalidation.then(() => {
+  deckInstance.finalize();
+  container.innerHTML = "";
+});
+
+deckInstance.setProps({
+  layers: [
+    new GeoJsonLayer({
+      id: 'base-map',
+      data: geoNeighborhoods,
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 1,
+      getLineColor: [255, 255, 255, 100],
+      getFillColor: [200, 200, 200, 50]
+    }),
+    new ScatterplotLayer({
+      id: 'listings',
+      data: listingsFiltradoForMap, 
+      pickable: true,
+      radiusScale: 10, 
+      radiusMinPixels: 3,
+      radiusMaxPixels: 10,
+      getPosition: d => [d.longitude, d.latitude], 
+      getFillColor: [176,224,230], 
+      getLineColor: [0, 0, 0],
+      lineWidthMinPixels: 1
+    })
+  ]
+});
+
+// Attach the container to the DOM
+document.body.appendChild(container);
+```
+
+```js
+container
+```
+
 
 ```js
 function plotHostSinceHistogram(data) {
@@ -673,15 +747,6 @@ let topHostsCount = await view(Inputs.range(
   }
 ));
 
-let minProperties = view(Inputs.range(
-  [1, 100], 
-  {
-    step: 1,
-    label: "Propiedades mínimas",
-    value: 10
-  }
-));
-
 let maxProperties = view(Inputs.range(
   [1, 250], 
   {
@@ -692,7 +757,7 @@ let maxProperties = view(Inputs.range(
 ));
 
 let listingsByHost = d3.group(listings, d => d.hostId)
-let hostRatings = d3.rollup(listings, v => d3.mean(v, d => d.rating), d=> d.hostId)
+let hostRatings = d3.rollup(listings, v => d3.mean(v, d => d.valueRating), d=> d.hostId)
 ```
 
 ```js
@@ -702,7 +767,7 @@ let topHosts = Array.from(hostRatings.entries())
     if(neighborhoodSelected != 'Todos'){
       listings = listings.filter(listing => listing.neighborhood == neighborhoodSelected);
     }
-    if(listings.length == 0 || listings.length < minProperties || listings.length > maxProperties) return null;
+    if(listings.length == 0 || listings.length > maxProperties) return null;
 
     const hostName = listings[0].hostName;
     const propertyCount = listings.length;
@@ -715,9 +780,10 @@ let topHosts = Array.from(hostRatings.entries())
     };
   })
   .filter(d => d !== null)
-  .sort((a, b) => b.avgRating - a.avgRating)
+  .sort((a, b) => b.propertyCount - a.propertyCount)
   .slice(0,topHostsCount);
 ```
+
 
 ```js
 Plot.plot({
@@ -736,7 +802,7 @@ Plot.plot({
       y: "hostName",
       fill: "hostName",
       sort: { y: "x", reverse: true }, 
-      title: d => `Propiedades: ${d.propertyCount}`
+      title: d => `Propiedades: ${d.propertyCount}\nRating: ${d.avgRating.toFixed(2)}`
     }),
     Plot.ruleX([0]), 
   ],
