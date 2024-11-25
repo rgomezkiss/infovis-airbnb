@@ -60,25 +60,11 @@ minListingsSlider = Math.ceil(minListingsSlider);
 maxListingsSlider = Math.ceil(maxListingsSlider); 
 
 // Aplicar los rangos a los sliders
-let minPrice = view(Inputs.range([minPriceSlider, maxPriceSlider], {
-  step: 1,
-  format: x => Math.ceil(x).toFixed(0),
-  label: "Precio mínimo",
-  value: minPriceSlider
-}));
-
 let maxPrice = view(Inputs.range([minPriceSlider, maxPriceSlider], {
   step: 1,
   format: x => Math.ceil(x).toFixed(0),
   label: "Precio máximo",
   value: maxPriceSlider
-}));
-
-let minListings = view(Inputs.range([minListingsSlider, maxListingsSlider], {
-  step: 1,
-  format: x => x.toFixed(0),
-  label: "Propiedades mínimo",
-  value: minListingsSlider
 }));
 
 let maxListings = view(Inputs.range([minListingsSlider, maxListingsSlider], {
@@ -91,9 +77,7 @@ let maxListings = view(Inputs.range([minListingsSlider, maxListingsSlider], {
 
 ```js
 let filteredData = neighborhoodStats.filter((d) => 
-  d.average_price >= minPrice && 
   d.average_price <= maxPrice &&
-  d.total_listings >= minListings && 
   d.total_listings <= maxListings
 );
 ```
