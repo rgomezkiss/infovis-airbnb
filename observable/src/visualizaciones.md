@@ -3,15 +3,25 @@ title: Visualizaciones
 toc: false
 ---
 
-# Visualizaciones
-
 ```js
-const listings = await FileAttachment('./data/listings.csv').csv({typed: true});
+//const listings = await FileAttachment('./data/listings.csv').csv({typed: true});
 const listings_filtrado = await FileAttachment('./data/listings_filtrado.csv').csv({typed: true});
 const listings_detailed = await FileAttachment('./data/listings_detailed.csv').csv({typed: true});
 const neighborhoods = await FileAttachment('./data/neighborhoods.csv').csv({ typed: true })
 const geoNeighborhoods = await FileAttachment('./data/neighbourhoods_geo.json').json()
+
+const listings = listings_filtrado.map(listing => {
+  const detailedData = listings_detailed.find(detail => detail.id === listing.id);
+
+  return {
+    ...listing, // Datos originales de listings_filtrado
+    ...(detailedData || {}) // Datos adicionales de listings_detailed (si existe)
+  };
+});
 ```
+
+# Visualizaciones de barrios y precios
+
 
 ```js
 const neighborhoodStats = Object.values(
@@ -169,7 +179,7 @@ function plotMapListingsByLocation(neighbourhoods, data) {
 }
 ```
 
-## Cantidad de listings por ubicación
+## Listings por ubicación
 
 <div class="grid grid-cols-1">
     <div class="card">
@@ -197,7 +207,7 @@ function plotMapPriceByLocation(neighbourhoods, data) {
         color: {
             legend: true,
             scheme: "blues",
-            domain: [Math.min(...data.map(d => d.average_price)) - 50, Math.max(...data.map(d => d.average_price))]
+            domain: [Math.min(...data.map(d => d.average_price)), Math.max(...data.map(d => d.average_price))]
         },
         marks: [
             Plot.geo(neighbourhoods, {
@@ -257,42 +267,9 @@ function scatterPlotCountMean(data, {width} = {}) {
     });
 }
 ```
-
-<!-- ```js
-function histogramCount(data, {width} = {}) {
-    const height = 400;
-
-    return Plot.plot({
-        title: "Distribución del número de propiedades",
-        width,
-        height,
-        x: {
-            label: "Número de propiedades",
-            grid: true
-        },
-        y: {
-            label: "Cantidad de barrios",
-            grid: true,
-        },
-        marks: [
-            Plot.rectY(data, Plot.binX({y: "count", thresholds: 8}, {
-                x: "total_listings",
-                fill: "steelblue",
-                title: d => `Cantidad de barrios: ${d.total_listings}`,
-            }))
-        ],
-    });
-}
-``` -->
-
-<div class="grid grid-cols-1">
-    <h2>Relacion entre la cantidad de propiedades y el precio en los barrios</h2>
-</div>
+## Relacion entre la cantidad de propiedades y el precio en los barrios
 
 <div class="grid grid-cols-2">
-    <!-- <div class="card">
-        ${resize((width) => histogramCount(filteredData, {width}))}
-    </div> -->
     <div class="card">
       ${resize((width) => scatterPlotCountMean(filteredData, {width}))}
     </div>
@@ -355,5 +332,129 @@ function pricePerNeighbourhood(data, {width} = {}) {
 </div>
 
 ---
+---
+
+# Visualizaciones de barrios y ratings
+
+```js
+const RATINGS = [
+  { label: "Limpieza", value: "avgCleanliness" },
+  { label: "Check-in", value: "avgCheckin" },
+  { label: "Comunicación", value: "avgCommunication" },
+  { label: "Ubicación", value: "avgLocation" },
+  { label: "Valor", value: "avgValue" }
+]
+
+let selectedRating = view(Inputs.select([
+  "avgCleanliness",
+  "avgCheckin",
+  "avgCommunication",
+  "avgLocation",
+  "avgValue"
+], {
+  label: "Selecciona el rating",
+  value: "avgValue" // Valor por defecto
+}))
+
+
+const ratingStats = Object.values(
+  listings_detailed.reduce((acc, curr) => {
+    const {
+      neighborhood,
+      cleanlinessRating,
+      checkinRating,
+      communicationRating,
+      locationRating,
+      valueRating,
+    } = curr;
+
+    if (!acc[neighborhood]) {
+      acc[neighborhood] = {
+        neighborhood,
+        totalCleanliness: 0,
+        totalCheckin: 0,
+        totalCommunication: 0,
+        totalLocation: 0,
+        totalValue: 0,
+        totalCount: 0,
+      };
+    }
+
+    acc[neighborhood].totalCleanliness += cleanlinessRating || 0;
+    acc[neighborhood].totalCheckin += checkinRating || 0;
+    acc[neighborhood].totalCommunication += communicationRating || 0;
+    acc[neighborhood].totalLocation += locationRating || 0;
+    acc[neighborhood].totalValue += valueRating || 0;
+    acc[neighborhood].totalCount += 1;
+
+    return acc;
+  }, {})
+)
+  .map(({ neighborhood, totalCleanliness, totalCheckin, totalCommunication, totalLocation, totalValue, totalCount }) => ({
+    neighborhood,
+    total_listings: totalCount,
+    avgCleanliness: (totalCleanliness / totalCount).toFixed(2),
+    avgCheckin: (totalCheckin / totalCount).toFixed(2),
+    avgCommunication: (totalCommunication / totalCount).toFixed(2),
+    avgLocation: (totalLocation / totalCount).toFixed(2),
+    avgValue: (totalValue / totalCount).toFixed(2),
+  }))
+  .sort((a, b) => b.total_listings - a.total_listings); 
+```
+
+```js
+function plotMapRatingsByLocation(neighbourhoods, data, selectedRating) {
+  const height = 610;
+
+  const projection = d3.geoMercator();
+  projection.fitExtent([[0, 0], [width, height]], neighbourhoods);
+
+  const dataMap = new Map(data.map(d => [
+    d.neighborhood,
+    {
+      rating: d[selectedRating],
+      total_listings: d.total_listings
+    }
+  ]));
+
+  return Plot.plot({
+    title: `Mapa de ${selectedRating} por barrio`,
+    projection,
+    width,
+    height,
+    color: {
+      legend: true,
+      scheme: "blues",
+      domain: [
+        Math.min(...data.map(d => parseFloat(d[selectedRating]))),
+        Math.max(...data.map(d => parseFloat(d[selectedRating])))
+      ]
+    },
+    marks: [
+      Plot.geo(neighbourhoods, {
+        stroke: "black",
+        strokeWidth: 1,
+        fill: d => dataMap.get(d.properties.neighbourhood)?.rating || 0,
+        title: d => {
+          const rating = dataMap.get(d.properties.neighbourhood)?.rating || 0;
+          const total_listings = dataMap.get(d.properties.neighbourhood)?.total_listings || 0;
+          return `Barrio: ${d.properties.neighbourhood}\nRating: ${rating}\nNúmero de propiedades: ${total_listings}`;
+        },
+        tip: true
+      }),
+    ]
+  });
+}
+
+```
+
+## Ratings por ubicación
+
+<div class="grid grid-cols-1">
+    <div class="card">
+        ${plotMapRatingsByLocation(geoNeighborhoods, ratingStats, selectedRating)}
+    </div>
+</div>
+
 
 **Fuente de Datos:** [Inside Airbnb](https://insideairbnb.com/get-the-data/)
