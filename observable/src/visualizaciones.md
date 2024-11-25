@@ -791,7 +791,7 @@ Plot.plot({
   marginTop: 20,
   marginRight: 20,
   marginBottom: 50,
-  marginLeft: 100,
+  marginLeft: 120,
   height: 40 * topHosts.length, 
   color: {
     domain: topHosts.map(d => d.hostName), 
