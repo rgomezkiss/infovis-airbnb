@@ -15,7 +15,7 @@ const listings = listings_filtrado.map(listing => {
 
   return {
     ...listing, // Datos originales de listings_filtrado
-    ...(detailedData || {}) // Datos adicionales de listings_detailed (si existe)
+    ...(detailedData || {}) // Datos adicionales de listings_detailed
   };
 });
 
@@ -581,11 +581,8 @@ const sortedRoomTypes = Object.entries(roomTypeCounts)
 
 const roomTypes = sortedRoomTypes.map(item => item.roomType);
 const counts = sortedRoomTypes.map(item => item.count);
-
 const totalRooms = counts.reduce((acc, curr) => acc + curr, 0);
-
 const percentages = counts.map(count => ((count / totalRooms) * 100).toFixed(2));
-
 const roomStatsHTML = roomTypes.map((roomType, index) => {
     return `${roomType}: ${counts[index]} (${percentages[index]}%)`;
   }).join(' --- ');
@@ -601,6 +598,7 @@ function plotRoomType(sortedRoomTypes) {
         fill: "steelblue", 
         stroke: "white" ,
         sort: { y: "x", reverse: true }, 
+        title: (d, i) => `${roomTypes[i]}: ${counts[i]} (${percentages[i]}%)`
       })
     ],
     marginLeft: 100,
@@ -621,11 +619,6 @@ function plotRoomType(sortedRoomTypes) {
         ${plotRoomType(sortedRoomTypes)}
     </div>
 </div>
-
-<div class="card">
-  <span class="big">${roomStatsHTML}</span>
-</div>
-
 
 ---
 
