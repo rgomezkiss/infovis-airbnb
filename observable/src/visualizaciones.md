@@ -287,6 +287,8 @@ function pricePerNeighbourhood(data, {width} = {}) {
                 fill: "total_listings",
                 title: d => `Precio promedio: $${d.average_price}\nNúmero de propiedades: ${d.total_listings}`,
                 tip: true,
+                stroke: "black",      
+                strokeWidth: 1, 
             }),
             Plot.text(sortedData, {
                 y: "neighbourhood",
@@ -663,7 +665,7 @@ deckInstance.setProps({
       stroked: true,
       filled: true,
       lineWidthMinPixels: 1,
-      getLineColor: [255, 255, 255, 100],
+      getLineColor: [0, 0, 0, 100],
       getFillColor: [200, 200, 200, 50]
     }),
     new ScatterplotLayer({
