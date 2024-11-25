@@ -727,7 +727,8 @@ Plot.plot({
   marginLeft: 100,
   height: 40 * topHosts.length, 
   color: {
-    scheme: "category10",
+    domain: topHosts.map(d => d.hostName), 
+    range: d3.schemeTableau20, 
   },
   marks: [
     Plot.barX(topHosts, {
