@@ -9,6 +9,7 @@ const listings_filtrado = await FileAttachment('./data/listings_filtrado.csv').c
 const neighborhoods = await FileAttachment('./data/neighborhoods.csv').csv({ typed: true })
 
 const WIDHT = 800
+const boxplot_with_outliers = await FileAttachment('./data/boxplot_with_outliers.png').image({width: WIDHT});
 const boxplot = await FileAttachment('./data/boxplot.png').image({width: WIDHT});
 const boxplot_removed = await FileAttachment('./data/boxplot_removed.png').image({width: WIDHT});
 ```
@@ -44,9 +45,11 @@ Se utilizaron principalmente dos datasets:
 Por otro lado, `listings_detailed.csv` cuenta con los siguientes valores adicionales:
 
 - **amenities**: Comodidades de la propiedad (ej. Wi-Fi, aire acondicionado).
+- **bathrooms**: Cantidad de baños de la propiedad.
+- **beds**: Cantidad de camas de la propiedad.
 - **hostResponseRate**: Tasa de respuesta del anfitrión.
 - **hostResponseTime**: Tiempo de respuesta del anfitrión.
-- **hostIsSuperhost**: Indica si el anfitrión es Superhost.
+- **hostIsSuperhost**: Indica si el anitrión es Superhost.
 - **rating**: Valoración general de la propiedad.
 - **accuracyRating**: Valoración de la precisión de la descripción de la propiedad.
 - **cleanlinessRating**: Valoración de la limpieza de la propiedad.
@@ -56,7 +59,11 @@ Por otro lado, `listings_detailed.csv` cuenta con los siguientes valores adicion
 - **valueRating**: Valoración de la relación calidad-precio.
 - **hostSince**: Fecha en que el anfitrión empezó a listar propiedades.
 
-Verificamos que no existan filas duplicadas en `listings.csv` y removimos los outliers de precios que empeoraban la visualización, basandonos en el Rango Intercuartílico (IQR), quedandonos asi con ${listings_filtrado.length} datos.
+Verificamos que no existan filas duplicadas en `listings.csv` y nos quedamos con las propiedades con precios menores a $80.000, quedandonos asi con ${listings_filtrado.length} datos.
+
+```js
+boxplot_with_outliers
+```
 
 ```js
 boxplot

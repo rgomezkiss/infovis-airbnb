@@ -59,11 +59,10 @@ let [minListingsSlider, maxListingsSlider] = d3.extent(neighborhoodStats, (d) =>
 minListingsSlider = Math.ceil(minListingsSlider);  
 maxListingsSlider = Math.ceil(maxListingsSlider); 
 
-// Aplicar los rangos a los sliders
 let maxPrice = view(Inputs.range([minPriceSlider, maxPriceSlider], {
   step: 1,
   format: x => Math.ceil(x).toFixed(0),
-  label: "Precio máximo",
+  label: "Precio promedio máximo",
   value: maxPriceSlider
 }));
 
@@ -85,8 +84,6 @@ let filteredData = neighborhoodStats.filter((d) =>
 ```js
 let propiedades = filteredData.reduce((acc, d) => acc + d.total_listings, 0).toLocaleString("en-US");
 
-let barrios = d3.group(filteredData, (d) => d.neighbourhood).size || 0; 
-
 let precio_promedio = filteredData.length > 0 
   ? d3.mean(filteredData, (d) => d.average_price).toLocaleString("en-US", {style: "currency", currency: "USD"}) 
   : "N/A";
@@ -107,7 +104,7 @@ let precio_barrio_mas_barato = minPrecio ? minPrecio.toLocaleString("en-US", {st
     <span class="big">${propiedades}</span>
   </div>
   <div class="card">
-    <h2>Precio Promedio</h2>
+    <h2>Precio Promedio Global</h2>
     <span class="big">${precio_promedio}</span>
   </div>
   <div class="card">
@@ -330,7 +327,7 @@ let selectedRatingView = view(Inputs.select(
   RATINGS.map(d => d.label)
 , {
   label: "Selecciona el rating",
-  value: "avgValue" // Valor por defecto
+  value: "avgValue" 
 }))
 ```
 
@@ -450,7 +447,7 @@ let selectedCommoditieView = view(Inputs.select(
   COMMODITIES.map(c => c.label),
   {
     label: "Selecciona la métrica",
-    value: "Baños" // Valor por defecto
+    value: "Baños"
   }
 ));
 ```
@@ -683,7 +680,6 @@ deckInstance.setProps({
   ]
 });
 
-// Attach the container to the DOM
 document.body.appendChild(container);
 ```
 
@@ -739,16 +735,14 @@ function plotHostSinceHistogram(data) {
 ## Top propietarios
 
 ```js
-let neighborhoodSelected = view(Inputs.select(
-  ["Todos", ...NEIGHBORHOODS],
+let neighborhoodSelected = view(Inputs.select(["Todos", ...NEIGHBORHOODS],
   { 
     label: "Barrio",
     value: "Todos" 
   }
 ));
 
-let topHostsCount = await view(Inputs.range(
-  [10, 1000], 
+let topHostsCount = await view(Inputs.range([10, 1000], 
   {
     step: 5,
     label: "Top hosts",
@@ -756,8 +750,7 @@ let topHostsCount = await view(Inputs.range(
   }
 ));
 
-let maxProperties = view(Inputs.range(
-  [1, 250], 
+let maxProperties = view(Inputs.range([1, 250], 
   {
     step: 1,
     label: "Propiedades máximas",
@@ -792,7 +785,6 @@ let topHosts = Array.from(hostRatings.entries())
   .sort((a, b) => b.propertyCount - a.propertyCount)
   .slice(0,topHostsCount);
 ```
-
 
 ```js
 Plot.plot({

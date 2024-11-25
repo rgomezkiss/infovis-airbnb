@@ -1,4 +1,4 @@
-import { csvFormat, csvParse } from "d3-dsv";
+/* import { csvFormat, csvParse } from "d3-dsv";
 import { readFileSync } from "fs";
 
 async function text(url) {
@@ -31,3 +31,4 @@ const listings = csvParse(csvData, (d) => ({
 }));
 
 process.stdout.write(csvFormat(listings));
+ */

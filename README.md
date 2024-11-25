@@ -12,4 +12,4 @@
 
 ## Link a la página
 
-[Link a la pagina deployada con Observable](https://mconca-infovis.observablehq.cloud/infovis-airbnb/)
+[Link a la pagina deployada con Observable](https://mconca-infovis.observablehq.cloud/infovis-airbn)
