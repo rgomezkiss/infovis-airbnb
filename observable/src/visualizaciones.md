@@ -623,16 +623,17 @@ const mainContainer = document.createElement('div');
 mainContainer.style.position = 'relative';
 
 const container = document.createElement('div');
-container.style.height = '600px';
+container.style.height = '700px';
 container.style.width = '100%';
 container.style.position = 'relative';
-container.style.borderRadius = '8px';
 container.style.overflow = 'hidden';
+container.style.marginLeft = "100px";
+container.style.paddingBottom = "100px";
 
 const initialViewState = {
   longitude: -58.3816,
   latitude: -34.6037,
-  zoom: 10,
+  zoom: 11,
   pitch: 0,
   bearing: 0
 };
