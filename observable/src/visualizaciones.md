@@ -626,9 +626,9 @@ function plotHostSinceHistogram(data) {
   return Plot.plot({
     marks: [
       Plot.barY(counts, {
-        x: years,  // Usamos los años en el eje X
+        x: years,  
         fill: "steelblue",
-        title: "Host Since"
+        title: (d, i) => `Cantidad: ${counts[i]}`
       })
     ],
     x: {
@@ -735,6 +735,7 @@ Plot.plot({
       y: "hostName",
       fill: "hostName",
       sort: { y: "x", reverse: true }, 
+      title: d => `Propiedades: ${d.propertyCount}`
     }),
     Plot.ruleX([0]), 
   ],
